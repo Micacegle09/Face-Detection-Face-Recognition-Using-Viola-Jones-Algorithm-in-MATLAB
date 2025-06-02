@@ -1,0 +1,43 @@
+clc;
+clear;
+close all;
+FDetect = vision.CascadeObjectDetector;%Importing the Face detector
+I = imread('test1.png');%Reading the input image
+BB = step(FDetect,I);%Returns the step value based on the image
+figure;
+imshow(I); hold on;
+%Printing the Boxes at the appropriate position
+
+%to imply and show face detection in the image.
+for i = 1:size(BB,1)
+rectangle('position',BB(i,:),'LineWidth',5,'LineStyle','-','EdgeColor','b');
+end
+title('Face Detection');
+hold off;
+
+NoseDetect=vision.CascadeObjectDetector('Nose','MergeThreshold',22);
+BB=step(NoseDetect,I);
+figure(2);imshow(I);
+for i = 1:size(BB,1)
+rectangle('Position',BB(i,:),'LineWidth',4,'LineStyle','-','EdgeColor','y');
+end
+title('Nose detected');
+hold off;
+
+MouthDetect=vision.CascadeObjectDetector('Mouth','MergeThreshold',200);
+BB=step(MouthDetect,I);
+figure(3);imshow(I);
+for i = 1:size(BB,1)
+rectangle('Position',BB(i,:),'LineWidth',4,'LineStyle','-','EdgeColor','g');
+end
+title('Mouth detected');
+hold off;
+
+EyeDetect=vision.CascadeObjectDetector('EyePairBig','MergeThreshold',2);
+BB=step(EyeDetect,I);
+figure(4);imshow(I);
+for i = 1:size(BB,1)
+rectangle('Position',BB(i,:),'LineWidth',4,'LineStyle','-','EdgeColor','r');
+end
+title('Eyes detected');
+hold off;

@@ -1,0 +1,48 @@
+clc;
+clear; 
+close all;
+loaded_Image=load_database();%loading the database using load_database() function
+random_Index=round(400*rand(1,1));%Generating a random index          
+random_Image=loaded_Image(:,random_Index);%locating the image from random index
+%Loading the rest of the images from columns 1 to index-1 the index+1 to
+%end, i.e initializing rest of the images matrix:
+rest_of_the_images=loaded_Image(:,[1:random_Index-1 random_Index+1:end]);         
+image_Signature=20;%initiliazing the image signature  
+%generating the white image from column size of rest of the images and 
+%using ones() function:
+white_Image=uint8(ones(1,size(rest_of_the_images,2)));
+%Finding mean value of rest of the images:
+mean_value=uint8(mean(rest_of_the_images,2));
+%subtracting the mean value from rest of the images
+mean_Removed=rest_of_the_images-uint8(single(mean_value)*single(white_Image)); 
+L=single(mean_Removed)'*single(mean_Removed);
+[V,D]=eig(L);%calculating eigen values and eigen vectors
+V=single(mean_Removed)*V;
+V=V(:,end:-1:end-(image_Signature-1));
+%initializing all image signature matrix:
+all_image_Signatire=zeros(size(rest_of_the_images,2),image_Signature);
+%Assinging the signature values from each image
+for i=1:size(rest_of_the_images,2)
+    all_image_Signatire(i,:)=single(mean_Removed(:,i))'*V;  
+end
+subplot(121);
+imshow(reshape(random_Image,112,92));%Showing the image which has to be recognized
+title('Looking for this Face','FontWeight','bold','Fontsize',16,'color','red');
+subplot(122);
+%subtracting mean value from random image - the image wich has to be
+%recognized:
+p=random_Image-mean_value;
+s=single(p)'*V;%multiplying it with the eigen vector
+z=[];%initializing z array
+%Uploading all the image signature values through for loop
+for i=1:size(rest_of_the_images,2)
+    z=[z,norm(all_image_Signatire(i,:)-s,2)];
+    %Showing the searching image by image:
+    if(rem(i,20)==0),imshow(reshape(rest_of_the_images(:,i),112,92)),end
+    drawnow;
+end
+[a,i]=min(z);%finding the image withe min difference in signature
+subplot(122);
+%showing the recognized face:
+imshow(reshape(rest_of_the_images(:,i),112,92));
+title('Recognition Completed','FontWeight','bold','Fontsize',16,'color','red');
